@@ -1,5 +1,5 @@
 {
-    "name": "roderik/cilex-twig",
+    "name": "kunstmaan/cilex-twig",
     "description": "The Twig provider from Silex for Cilex",
     "keywords": ["cilex", "twig", "provider"],
     "license": "MIT",
