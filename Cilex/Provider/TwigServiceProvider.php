@@ -11,8 +11,8 @@
 
 namespace Cilex\Provider;
 
-use Cilex\Application;
-use Cilex\ServiceProviderInterface;
+use Pimple\Container;
+use Pimple\ServiceProviderInterface;
 
 /**
  * Twig integration for Cilex.
@@ -21,20 +21,24 @@ use Cilex\ServiceProviderInterface;
  */
 class TwigServiceProvider implements ServiceProviderInterface
 {
-    public function register(Application $app)
+    /**
+     * @param Container $app
+     */
+    public function register(Container $app)
     {
-        $app['twig.options'] = array();
-        $app['twig.form.templates'] = array('form_div_layout.html.twig');
-        $app['twig.path'] = array();
-        $app['twig.templates'] = array();
+        $app['twig.options'] = [];
+        $app['twig.form.templates'] = ['form_div_layout.html.twig'];
+        $app['twig.path'] = [];
+        $app['twig.templates'] = [];
 
-        $app['twig'] = $app->share(function ($app) {
+        $app['twig'] = function ($app) {
             $app['twig.options'] = array_replace(
-                array(
-                    'charset'          => "UTF-8",
-                    'debug'            => (isset($app['debug']) ? $app['debug'] : false),
+                [
+                    'charset' => "UTF-8",
+                    'debug' => (isset($app['debug']) ? $app['debug'] : false),
                     'strict_variables' => (isset($app['debug']) ? $app['debug'] : false),
-                ), $app['twig.options']
+                ],
+                $app['twig.options']
             );
 
             $twig = new \Twig_Environment($app['twig.loader'], $app['twig.options']);
@@ -46,26 +50,28 @@ class TwigServiceProvider implements ServiceProviderInterface
             }
 
             return $twig;
-        });
+        };
 
-        $app['twig.loader.filesystem'] = $app->share(function ($app) {
+        $app['twig.loader.filesystem'] = function ($app) {
             return new \Twig_Loader_Filesystem($app['twig.path']);
-        });
+        };
 
-        $app['twig.loader.array'] = $app->share(function ($app) {
+        $app['twig.loader.array'] = function ($app) {
             return new \Twig_Loader_Array($app['twig.templates']);
-        });
+        };
 
-        $app['twig.loader.string'] = $app->share(function ($app) {
+        $app['twig.loader.string'] = function ($app) {
             return new \Twig_Loader_String();
-        });
+        };
 
-        $app['twig.loader'] = $app->share(function ($app) {
-            return new \Twig_Loader_Chain(array(
-                $app['twig.loader.filesystem'],
-                $app['twig.loader.array'],
-                $app['twig.loader.string'],
-            ));
-        });
+        $app['twig.loader'] = function ($app) {
+            return new \Twig_Loader_Chain(
+                [
+                    $app['twig.loader.filesystem'],
+                    $app['twig.loader.array'],
+                    $app['twig.loader.string'],
+                ]
+            );
+        };
     }
 }
